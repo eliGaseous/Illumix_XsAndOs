@@ -10,7 +10,8 @@ public class GameManager : MonoBehaviour
 	private List<DynamicToggle> gameState = new List<DynamicToggle>();
 	[SerializeField]
 	private float cpuTurnThinkTime = 0.0f;
-	private bool vsCPU;
+	private bool vsCPU = true;
+	private bool oGoesFirst = false;
 	private int player;
 	private int piecesUsed;
 
@@ -37,7 +38,14 @@ public class GameManager : MonoBehaviour
 	//Set Player Count and start game sequence
 	public void SetPlayerCount(int playerCount)
 	{
+		bool wasA2PlayerGameLastTurn = !vsCPU;
 		vsCPU = playerCount < 2;
+
+		if (!vsCPU & wasA2PlayerGameLastTurn)
+			oGoesFirst = !oGoesFirst;
+		else
+			oGoesFirst = false;
+
 		StartGame();
 	}
 
@@ -45,7 +53,7 @@ public class GameManager : MonoBehaviour
 	public void StartGame()
 	{
 		//set to player X;
-		player = 0;
+		player = oGoesFirst ? 1 : 0;
 		piecesUsed = 0;
 		//Reset Listeners and prepare buttons
 		foreach (var item in gameState)
