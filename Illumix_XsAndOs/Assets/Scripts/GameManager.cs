@@ -2,13 +2,14 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
-using UnityEngine.Events;
 using UnityEngine.UI;
 
 public class GameManager : MonoBehaviour
 {
 	[SerializeField]
 	private List<DynamicToggle> gameState = new List<DynamicToggle>();
+	[SerializeField]
+	private float cpuTurnThinkTime = 0.0f;
 	private bool vsCPU;
 	private int player;
 	private int piecesUsed;
@@ -31,6 +32,9 @@ public class GameManager : MonoBehaviour
 
 	public UnityEvent<int> TheresAWinner = new UnityEvent<int>();
 
+	/*------------------------- Public -------------------------*/
+
+	//Set Player Count and start game sequence
 	public void SetPlayerCount(int playerCount)
 	{
 		vsCPU = playerCount < 2;
@@ -42,8 +46,8 @@ public class GameManager : MonoBehaviour
 	{
 		//set to player X;
 		player = 0;
-		//Reset Listeners and prepare buttons
 		piecesUsed = 0;
+		//Reset Listeners and prepare buttons
 		foreach (var item in gameState)
 		{
 			item.GetComponent<Button>().onClick.RemoveAllListeners();
@@ -61,19 +65,21 @@ public class GameManager : MonoBehaviour
 		piecesUsed++;
 
 		gameState[space].SetState(player);
-		int winstate = GetWinState();
+		int[] winstate = GetWinState();
 
 
-		if (winstate > -1)
+		if (winstate.Length > 0)
 			Win(winstate);
 		else
 		{
 			if (piecesUsed < 9)
 				NextPlayer();
 			else
-				Win(-1);
+				Win(winstate);
 		}
 	}
+
+	/*------------------------- Private -------------------------*/
 
 	//Cycle through players
 	private void NextPlayer()
@@ -105,11 +111,14 @@ public class GameManager : MonoBehaviour
 	{
 		bool emptyFound = false;
 		int chosenSpace = Random.Range(0, 9);
+
+		//simulte the computer thinking
+		yield return new WaitForSeconds(cpuTurnThinkTime);
 		while (!emptyFound)
 		{
 			if (gameState[chosenSpace].State == -1)
 				break;
-			yield return new WaitForSeconds(0.25f);
+			yield return new WaitForSeconds(cpuTurnThinkTime);
 			chosenSpace = (chosenSpace + 4) % 9;
 		}
 		RegisterInput(chosenSpace);
@@ -117,15 +126,19 @@ public class GameManager : MonoBehaviour
 	}
 
 	//Called when a win is registered
-	private void Win(int winstate)
+	private void Win(int[] winstate)
 	{
-		if (winstate > -1)
+		if (winstate.Length > 0)
 		{
-			int rootSpace = conditions[winstate][0];
-			int spaceDelta = conditions[winstate][1];
-			gameState[rootSpace].WinningPiece();
-			gameState[rootSpace + spaceDelta].WinningPiece();
-			gameState[rootSpace + spaceDelta + spaceDelta].WinningPiece();
+			foreach (var item in winstate)
+			{
+				int rootSpace = conditions[item][0];
+				int spaceDelta = conditions[item][1];
+				gameState[rootSpace].WinningPiece();
+				gameState[rootSpace + spaceDelta].WinningPiece();
+				gameState[rootSpace + spaceDelta + spaceDelta].WinningPiece();
+			}
+
 
 			TheresAWinner?.Invoke(player);
 		}
@@ -134,15 +147,16 @@ public class GameManager : MonoBehaviour
 	}
 
 	//returns an int representing the winning sequence condition
-	private int GetWinState()
+	private int[] GetWinState()
 	{
+		List<int> wins = new List<int>();
 		for (int i = 0; i < conditions.Length; i++)
 		{
 			if (CheckWin(conditions[i][0], conditions[i][1]))
-				return i;
+				wins.Add(i);
 		}
 
-		return -1;
+		return wins.ToArray();
 
 	}
 

@@ -11,7 +11,7 @@ public class DynamicToggle : MonoBehaviour
 	/// </summary>
 	[Header("XnOSprites")]
 	[SerializeField]
-	private List<Sprite> Pieces;
+	private List<Image> Pieces;
 
 	/// <summary>
 	/// Return the current state of the toggle, -1 is false
@@ -35,7 +35,7 @@ public class DynamicToggle : MonoBehaviour
 
 	private void Start()
 	{
-		image = GetComponent<Image>();
+		//image = GetComponent<Image>();
 		ResetToggle();
 	}
 
@@ -52,10 +52,13 @@ public class DynamicToggle : MonoBehaviour
 			ResetToggle();
 			return;
 		}
+		if (toggleState > -1)
+			Pieces[toggleState].color = Color.clear;
 
 		toggleState = stateIndex;
-		image.color = Color.white;
-		image.sprite = Pieces[stateIndex];
+		Pieces[stateIndex].color = Color.white;
+		//image.color = Color.white;
+		//image.sprite = Pieces[stateIndex];
 	}
 
 	/// <summary>
@@ -63,10 +66,16 @@ public class DynamicToggle : MonoBehaviour
 	/// </summary>
 	public void ResetToggle()
 	{
+
 		StopAllCoroutines();
 		toggleState = -1;
-		image.color = Color.clear;
-		image.sprite = null;
+		foreach (var item in Pieces)
+		{
+			item.color = Color.clear;
+		}
+
+		//image.color = Color.clear;
+		//image.sprite = null;
 	}
 
 

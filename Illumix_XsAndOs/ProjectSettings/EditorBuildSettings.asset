@@ -6,6 +6,12 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
+    path: Assets/Scenes/Version Selector.unity
+    guid: 8e41a8881e4d9614db4cd5b8c7421a7a
+  - enabled: 1
+    path: Assets/Scenes/To The Specs.unity
+    guid: 91f2f54f625a7cd4596ded1f2efa3fa3
+  - enabled: 1
     path: Assets/Scenes/TicTacToe.unity
     guid: 4a231d70484d94b4ba1bc1131233853c
   m_configObjects: {}
